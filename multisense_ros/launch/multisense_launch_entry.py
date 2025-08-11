@@ -16,7 +16,7 @@ def generate_launch_description():
                                    description='Type of multisense: S21, SL, S7, S7S, S27, S30, KS21, KS21i')
 
     namespace = DeclareLaunchArgument(name='namespace',
-                                      default_value='multisense',
+                                      default_value='multisense_entry',
                                       description='Namespace for this MultiSense instance')
 
     mtu = DeclareLaunchArgument(name='mtu',
@@ -59,6 +59,15 @@ def generate_launch_description():
                                                                    LaunchConfiguration('sensor'),
                                                                    'standalone.urdf.xacro']),
                                              " name:=", LaunchConfiguration('namespace')])}])
+    # Static TF for entry sensor
+    static_tf_entry = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_tf_multisense_entry',
+        namespace=[LaunchConfiguration('entry_namespace')],
+        condition=IfCondition(LaunchConfiguration('launch_entry_sensor')),
+        arguments=['-0.035', '0', '1.0', '0.0', '0.9', '0.0', 'base_link', 'multisense_entry/head']
+    )
 
     return LaunchDescription([sensor,
                               namespace,
@@ -68,4 +77,5 @@ def generate_launch_description():
                               use_sensor_qos,
                               launch_robot_state_publisher,
                               multisense_ros,
-                              robot_state_publisher])
+                              robot_state_publisher,
+                              static_tf_entry])
